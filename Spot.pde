@@ -19,6 +19,7 @@ class Spot {
   }
 
   void show(color c) {
+    noStroke();
     fill(c);
     if (obstacle == true) {
       fill(50);

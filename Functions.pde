@@ -33,8 +33,8 @@ void recreatepath(Spot spot) {
   spot.show(col);
   
   if (spot.i == start.i && spot.j == start.j) {
-    print("\nCost: ", cost);
-    print("\nStopping");
+    //print("\nCost: ", cost);
+    //print("\nStopping");
     return;
   } 
   else {

@@ -1,23 +1,30 @@
+import com.hamoid.*;
+
+VideoExport vid;
+
 float w, h;
-int ncols = 15;
-int nrows = 15;
+int ncols = 50;
+int nrows = 50;
 Spot[][] grid = new Spot[nrows][ncols];
 ArrayList<Spot> OpenSet = new ArrayList<Spot>();
 ArrayList<Spot> ClosedSet = new ArrayList<Spot>();
 Spot current;
 Spot start = new Spot(0, 0);
-Spot end = new Spot(14, 14);
+Spot end = new Spot(49, 49);
 int cost = 0;
 int obstacle_percentage = 20;
 
 void setup() {
   size(600, 600);
-  frameRate(10);
+  frameRate(80);
   w = 600/ncols;
   h = 600/nrows;
+  
+  // Setup for video export
+  vid = new VideoExport(this);
 
   // Initalize the grid
-  color c = #f1f1f1;
+  color c = 200;
   for (int i = 0; i < ncols; i++) {
     for (int j = 0; j < nrows; j++) {
       grid[i][j] = new Spot(i, j);
@@ -44,11 +51,12 @@ void setup() {
   //   s.c = col;
   //   s.show();
   // }
+  
+  vid.startMovie();
 }
 
 
 void draw() {
-
   if (OpenSet.size() > 0) {
     // Main body of the algorithm
 
@@ -61,7 +69,10 @@ void draw() {
       print("\nDestination arrived");
       end.camefrom_i = current.camefrom_i;
       end.camefrom_j = current.camefrom_j;
-      recreatepath(current);
+      //recreatepath(current);
+      print("\nCost: ", cost);
+      print("\nTime: ", frameCount/frameRate);
+      vid.endMovie();
       noLoop();
     } else {
       OpenSet.remove(win_index); // Remove the current element as it will be checked in this interation
@@ -69,32 +80,35 @@ void draw() {
 
       for (int i = 0; i < ClosedSet.size(); i++) {
         Spot s = ClosedSet.get(i);
-        s.show(150); // Spots already evaluated turn GREY
+        s.show(#f1f1f1); // Spots already evaluated turn GREY
       }
 
       ArrayList<Spot> neighbours = new ArrayList<Spot>();
       neighbours = getneighbours(current);
       // Test
       if (isinarraylist(neighbours, end) == true) {
-        print("\nEnd has been found!"); 
+        print("\nEnd has been found!");
       }
 
       for (int i = 0; i < neighbours.size(); i++) {
         Spot neighbour = neighbours.get(i);
         neighbour.show(#ffff00);
 
-        float tentative_gscore = current.gscore + dist(current, neighbour);
-        if (tentative_gscore < neighbour.gscore && neighbour.obstacle == false) {
-          neighbour.camefrom_i = current.i;
-          neighbour.camefrom_j = current.j;
-          neighbour.gscore = tentative_gscore;
-          neighbour.fscore = tentative_gscore + dist(neighbour, end);
-          print("\nUpdating fscore: ", neighbour.fscore);
-          if (isinarraylist(OpenSet, neighbour) == false) {
-            OpenSet.add(neighbour);
+        if (isinarraylist(ClosedSet, neighbour) == false && neighbour.obstacle == false) {
+          float tentative_gscore = current.gscore + dist(current, neighbour);
+          if (tentative_gscore < neighbour.gscore) {
+            neighbour.camefrom_i = current.i;
+            neighbour.camefrom_j = current.j;
+            neighbour.gscore = tentative_gscore;
+            neighbour.fscore = tentative_gscore + dist(neighbour, end);
+            print("\nUpdating fscore: ", neighbour.fscore);
+            if (isinarraylist(OpenSet, neighbour) == false) {
+              OpenSet.add(neighbour);
+            }
           }
+          current.show(#0000ff);
+          recreatepath(current);
         }
-        current.show(#0000ff);
       }
       print("\n---------");
     }
@@ -104,4 +118,5 @@ void draw() {
   }
   start.show(#ff0000);
   end.show(#00ff00);
+  vid.saveFrame();
 }
