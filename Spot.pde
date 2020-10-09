@@ -4,7 +4,7 @@ class Spot {
   
   float gscore = 99999;
   float hscore = 0;
-  float fscore = 0;
+  float fscore = 99999;
 
   float camefrom_i = 0;
   float camefrom_j = 0;
